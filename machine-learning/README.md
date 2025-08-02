@@ -2,7 +2,7 @@
 
 API desarrollada con FastAPI para predecir la supervivencia de pasajeros del Titanic utilizando un modelo Random Forest pre-entrenado.
 
-> **Desarrollado por:** Bautista Peco  
+> **Desarrollado por:** Bautista Peco
 
 > **Proyecto:** Challenge GenAI - Machine Learning
 
