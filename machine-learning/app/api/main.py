@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 model = {}
 
 
+# Se carga el modelo al levantar la app
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
@@ -20,17 +21,18 @@ async def lifespan(app: FastAPI):
         yield
     
     except FileNotFoundError:
-        raise HTTPException(500, "Model not found")
+        raise HTTPException(500, "Modelo no encontrado.")
     
     except:
-        raise HTTPException(500, "Error while loading the model.")
+        raise HTTPException(500, "Error al intentar cargar el modelo.")
 
 
-app = FastAPI(title='Titanic Suvivor Predictos', 
+app = FastAPI(title='Titanic Suvivor Predictor', 
               version='1.0.0',
               lifespan=lifespan)
 
 
+# Endpoint para validar el estado de la app
 @app.get("/health")
 def health():
     return {
@@ -38,9 +40,12 @@ def health():
         "model_loaded": bool(model.get('rfc_model'))
     }
 
+
+# Endpoint para predecir
 @app.post('/predict', status_code=200)
 def predict(input: FeaturesInput) -> Prediction:
 
+    # Conversión para la predicción
     input_arr = np.array([[
         input.pclass,
         input.sex,
@@ -57,6 +62,7 @@ def predict(input: FeaturesInput) -> Prediction:
         decision = 1 if score >= THRESHOLD else 0
         decision_description = 'Sobrevivió' if decision == 1 else 'No sobrevivió'
 
+        # Estructura del resultado final
         prediction_result = Prediction(score=score,
                                        decision=decision,
                                        description=decision_description)
