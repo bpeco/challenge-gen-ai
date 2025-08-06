@@ -9,17 +9,12 @@ En este repositorio presento la **arquitectura RAG** que diseñé para el tercer
 5. La capa de exposición de la aplicación vía API.  
 6. El flujo en vivo desde la petición del empleado hasta la respuesta final.
 
-Más adelante, en la sección de **“Mejoras propuestas”**, detallo cómo podríamos llevar esto hacia un diseño más “agentic” con MCPs.
-
 ---
 
-## Etapa 1: Knowledge Base Creation  (Anexo)
+## Etapa 1: Knowledge Base Creation
 
-> **Nota:** La creación inicial de la KB está documentada como anexo para no sobrecargar el flujo principal.
-
-En dicho anexo explico cómo diseñé la KB en Bedrock:
 - Conecto a S3/RDS como datasource.
-- Selecciono **Titan Text Embeddings v2** (1024‑dim, soporte multilingüe, optimizado para RAG, buena precisión y más barato que la v1).
+- Elijo **Titan Text Embeddings v2** (1024‑dim, soporte multilingüe, optimizado para RAG, buena precisión y más barato que la v1).
 - Configuro chunking y OpenSearch Serverless como backend vectorial.
 
 ![Diagrama - Creación Knowledge Base](resources/1-creacion-KB.png)
@@ -187,4 +182,4 @@ Para evaluar el retriever utilizaría **RAGAS**, una librería que sirve especí
 - **Conversational Memory**: mantener contexto entre múltiples queries del mismo usuario
 
 **Integración Empresarial**
-- **MCPs (Model Context Protocol)** para conectar con sistemas internos:
+- **MCPs (Model Context Protocol)** para conectar con sistemas internos
