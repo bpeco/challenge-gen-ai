@@ -77,6 +77,40 @@ Esta arquitectura va a estar orquestada mediante LangGraph. Una representación 
 4. Se aplica re-ranking con Bedrock y se extraen top‑5.
 5. Estos documentos pasan al nodo final de generación.
 
+## Evaluación del Sistema de Retrieve
+
+**Propósito**: medir objetivamente la calidad del sistema de recuperación mediante métricas estándar y herramientas especializadas.
+
+### 4.1 Framework de Evaluación: RAGAS
+
+Para evaluar el retriever utilizaría **RAGAS**, una librería que sirve específifcamente para la evaluación de sistemas RAG. Me permite medir tanto la calidad del retrieve como de la generación.
+
+### 4.2 Métricas del Retriever (profundizo sobre las métricas indicadas en el diagrama)
+
+#### Métricas Tradicionales (con ground-truth)
+
+-  **Precision@K**: proporción de documentos relevantes entre los top-K recuperados
+   - *Justificación*: Mide qué tan "limpios" son los resultados del retrieve. Es decir, penaliza por devolver documentos irrelevantes.
+   - *Implementación*: `precision_at_k = relevant_docs_in_topk / k`
+
+- **Recall@K**: cobertura de documentos relevantes totales en el corpus
+   - *Justificación*: Evalúa si el sistema encuentra todos los documentos importantes. Por el contrario de 'precision, penaliza por dejar afuera de la selección documentos relevantes.
+   - *Implementación*: `recall_at_k = relevant_docs_in_topk / total_relevant_docs`
+
+- **MRR (Mean Reciprocal Rank)**: analiza cuán arriba en el ranking de los documentos devueltos aparecen los documentos relevantes.
+   - *Justificación*: Penaliza cuando documentos relevantes aparecen en posiciones bajas
+
+#### Métricas sin Ground-Truth (LLM-as-a-Judge)
+
+- **Context Relevancy** (RAGAS): mide qué tan relevante es el contexto recuperado para la pregunta
+   - *Implementación*: el LLM evalúa relevancia semántica entre query y documentos
+   - *Ventaja*: No requiere etiquetado manual de relevancia
+
+- **Context Precision** (RAGAS): evalúa si los documentos recuperados contienen información necesaria
+   - *Implementación*: el LLM determina si cada chunk aporta información útil
+   - *Ventaja*: Detecta ruido en los resultados del retrieve
+
+
 ---
 
 ## Etapa 5: Exposición de la Aplicación
@@ -116,23 +150,41 @@ Esta arquitectura va a estar orquestada mediante LangGraph. Una representación 
 
 ---
 
-
-## 7. Propuesta de Métricas de Evaluación del Retrieve
-
-**Propósito**: medir objetivamente la calidad del sistema de recuperación.
-
-> En el caso de tener alguna especie de *ground-truth* con pares de preguntas-documentos, entonces podría utilizar las siguientes métricas para evaluar la performance del **retriever** :
-
--  **Precision@K**: proporción de documentos relevantes entre los top-K.
-- **Recall@K**: cobertura de los documentos relevantes totales.
-- **MRR (Mean Reciprocal Rank)**: promedio del recíproco del ranking del primer documento relevante.
-- **MAP@K (Mean Average Precision)**: precisión promedio acumulada hasta K documentos por consulta.
-
-
----
-
 ## 8. Roadmap de Mejoras
 
-- Incorporar flujo **agentic** con múltiples agentes coordinados por LangGraph.
-- Implementar **Bedrock Guardrails** para enforcing de grounding y seguridad.
-- Exponer modo **streaming** con tokens incrementales desde el LLM final.
+### 8.1 Corto Plazo
+
+**Optimización del Retrieve**
+- **Hybrid Search**: combinar búsqueda semántica (embeddings) con búsqueda por keywords (BM25) para mejorar recall
+- **Chunking Adaptativo**: implementar estrategias de chunking dinámicas según tipo de documento
+
+**Observabilidad y Métricas**
+- Implementar **CloudWatch** dashboards para latencia, throughput y error rates
+- Configurar alertas por degradación de calidad en las respuestas
+- **A/B Testing** framework para evaluar mejoras al retriever
+
+### 8.2 Mediano Plazo
+
+**Arquitectura Agentic**
+- **Multi-Agent System** con LangGraph:
+  - *Specialist Agents*: agentes especializados por dominio (políticas HR, procedimientos IT, regulaciones)
+  - *Coordinator Agent*: router inteligente que determina qué agente consultar
+- **Tool Calling**: permitir que agentes ejecuten acciones (consultas a APIs internas, etc.)
+
+**Seguridad y Compliance**
+- **Bedrock Guardrails** para:
+  - Prevenir alucinaciones mediante grounding
+  - Filtrar contenido sensible o confidencial
+  - Validar que respuestas cumplan políticas corporativas
+
+**Performance y Escala**
+- **Modo Streaming**
+- **Caching Inteligente**: cache de embeddings y resultados frecuentes
+
+### 8.3 Largo Plazo
+
+**Inteligencia Avanzada**
+- **Conversational Memory**: mantener contexto entre múltiples queries del mismo usuario
+
+**Integración Empresarial**
+- **MCPs (Model Context Protocol)** para conectar con sistemas internos:
